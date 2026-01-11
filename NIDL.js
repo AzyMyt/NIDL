@@ -1,6 +1,6 @@
 const classicsId = "1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI";
 const platformersId = "1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI";
-const classicsRange = "Classics!A1:E200";
+const classicsRange = "Classics!A1:F200";
 const platformersRange = "Platformers!A1:E153";
 const key = "AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU";
 const classicUrl = `https://sheets.googleapis.com/v4/spreadsheets/${classicsId}/values/${encodeURIComponent(classicsRange)}?key=${key}`;
@@ -103,69 +103,79 @@ async function GenerateList() {
   }
 }
 
-//one higher than the highest
-const ENJvalues = Array.from({ length: 13 }, (_, i) => i - 1);
-const AEMvalues = Array.from({ length: 37 }, (_, i) => i);
-const GDDLvalues = Array.from({ length: 40 }, (_, i) => i);
-
-function valueToColour(value, min, max) {
-  const t = (value - min) / (max - min);
-  const h = 240 - t * 240;
-  return `hsl(${h}, 80%, 50%)`;
-}
-
-//hardcode nlw because its better than assigning 400 static variables
-console.log(ENJvalues, AEMvalues, GDDLvalues);
-
 function renderCard(item) {
-  if (item.CompletionLink?.trim()) {
-    entry = document.createElement("a");
-    entry.href = item.CompletionLink;
-  } else {
-    entry = document.createElement("div");
-  }
+  entry = document.createElement("div");
   entry.classList.add("card");
+  entry.classList.add(styling);
   entry.classList.add(type);
-  if (item.Record) {
-    if (item.CompletionLink?.trim()) {
-      entry.classList.add("card");
-      const completionID = item.CompletionLink.match(
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/,
-      )[1];
 
-      console.log(item.CompletionLink, completionID);
-      entry.style.setProperty(
-        "--bg-url",
-        `url("https://img.youtube.com/vi/${completionID}/maxresdefault.jpg")`,
-      );
+  if (item.Record) {
+    if (styling == "modern") {
+      entry.innerHTML += `<p class="levelPos">#${item.Pos}</p>`;
     }
-    if (styling == "grid") {
-      entry.innerHTML = `
-      <a href="${item.CompletionLink}" target="_blank">
+    const completionID = item.CompletionLink.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/,
+    )[1];
+
+    console.log(item.Record, item.CompletionLink, completionID);
+    entry.style.setProperty(
+      "--bg-url",
+      `url("https://img.youtube.com/vi/${completionID}/maxresdefault.jpg")`,
+    );
+    entry.innerHTML += `
+      <a href="${item.CompletionLink}" target="_blank" width="${thumbWidth}" height="${thumbHeight}">
       <img src="https://img.youtube.com/vi/${completionID}/maxresdefault.jpg" width=${thumbWidth} height=${thumbHeight}>
       </a>
     `;
-    } else {
-      if (type == "classics") {
-        entry.innerHTML += `
-        <p>${item.Pos}:</p>
-        <div class="container">
-          <p class="textLevel">${item.Record}</p>
-          <p class="textPublisher">by ${item.Publisher}</p>
-        </div>
-        <p class="firstVictor">${item.FirstVictor}</p>
-        `;
-      } else {
-        entry.innerHTML += `
-        <p>${item.Pos}</p>
-        <p class="textLevel">${item.Record}</p>
-        <p class="textPublisher">${item.Publisher}</p>
-        <p class="firstVictor">${item.FirstVictor}</p>
-        `;
+
+    if (type == "classics" && styling == "modern") {
+      if (!item.FollowingVictors) {
+        item.FollowingVictors = "";
       }
+      entry.innerHTML += `
+        <div class="cardContainer" style="background: linear-gradient(
+        270deg,
+        rgba(0, 0, 0, 0),
+        rgba(5, 5, 5, 1)
+        ), url('https://img.youtube.com/vi/${completionID}/maxresdefault.jpg');
+        background-size: cover;">
+          <div class="container">
+            <div class="level">
+              <p class="textLevel">${item.Record}</p>
+              <p class="textPublisher">by ${item.Publisher}</p>
+            </div>
+          </div>
+          <div class="container victors">
+            <p class="firstVictor">${item.FirstVictor}</p>
+            <p class="followingVictors">${item.FollowingVictors}</p>
+          </div>
+        </div>
+        `;
+    } else if (type == "platformers" && styling == "modern") {
+      //platformers
+      entry.innerHTML += `
+        <div class="cardContainer" style="background: linear-gradient(
+        270deg,
+        rgba(0, 0, 0, 0),
+        rgba(5, 5, 5, 1)
+        ), url('https://img.youtube.com/vi/${completionID}/maxresdefault.jpg');
+        background-size: cover;">
+          <div class="container">
+            <div class="level">
+              <p class="textLevel">${item.Record}</p>
+              <p class="textPublisher">by ${item.Publisher}</p>
+            </div>
+          </div>
+          <div class="container victors">
+            <p class="firstVictor">${item.FirstVictor}</p>
+            <p class="followingVictors">${item.FollowingVictors}</p>
+          </div>
+        </div>
+        `;
     }
-    list.appendChild(entry);
   }
+  list.appendChild(entry);
 }
+
 GenerateList();
 console.log(styling, type);
