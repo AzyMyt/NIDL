@@ -51,7 +51,7 @@ h3 {
     position: relative;
     gap: 10px;
     grid-template-columns: 200px 320px 1fr;
-    transform: translateX(-120px);
+    transform: translateX(-100px);
 }
 
 .card img {
@@ -161,7 +161,7 @@ h3 {
     justify-content: center;
     justify-items: center;
     width: 100%;
-    transform: translateX(120px);
+    transform: translateX(100px);
 }
 
 .gridstyle > * {
