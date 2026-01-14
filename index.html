@@ -11,7 +11,7 @@
     />
 
     <script src="NIDL.js" defer></script>
-    <link rel="stylesheet" href="NIDL.css"></link>
+    <link rel="stylesheet" href="style.css"></link>
 </head>
 
 <body>
@@ -28,12 +28,19 @@
     <a href="https://docs.google.com/spreadsheets/d/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/edit?usp=sharing" target="_blank">Sheet version</a>
 
     <div class="options">
-        <button class="btnToggle" id="modern">List</button>
-        <button class="btnToggle" id="grid">Grid</button>
-        <button class="btnToggleType" id="classics">Classics</button>
-        <button class="btnToggleType" id="platformers">Platformers</button>
+        <div style="display: flex; column; gap: 10px;">
+            <button class="btnToggle" id="modern">List</button>
+            <button class="btnToggle" id="grid">Grid</button>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btnToggleType" id="classics">Classics</button>
+            <button class="btnToggleType" id="platformers">Platformers</button>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button id="profiles">To player</button>
+            <textarea id="targetPlayerInput" placeholder="Search player" style="background-color: #000;"></textarea>
+        </div>
     </div>
-
 </div>
 
 <div id="list" class="list"></div>
