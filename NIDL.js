@@ -167,11 +167,10 @@ function renderCard(item) {
       <img src="https://img.youtube.com/vi/${completionID}/maxresdefault.jpg" width="320" height="180">
       </a>
     `;
-
+    if (!item.FollowingVictors) {
+      item.FollowingVictors = "";
+    }
     if (type == "classics" && styling == "modern") {
-      if (!item.FollowingVictors) {
-        item.FollowingVictors = "";
-      }
       entry.innerHTML += `
         <div class="cardContainer" style="background: linear-gradient(
         270deg,
