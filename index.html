@@ -13,34 +13,42 @@
     <script src="NIDL.js" defer></script>
     <link rel="stylesheet" href="style.css"></link>
 </head>
-
 <body>
-<div class="contents">
 
-    <div class="NIDLheader">
-    <img src="images/NIDL.png">
-        <h1>Northern Ireland Demon List</h1>
-    </div>
-    <h3>Hardest demon completions in Northern Ireland</h3>
 
-    <p>All completions currently ranked based on AREDL placements / DM @azymyt on Discord about records/inquiries</p>
-    <a href="https://docs.google.com/spreadsheets/d/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/edit?usp=sharing" target="_blank">Sheet version</a>
 
+<div class="NIDLheader">
+    <img src="images/NIDLnew.png">
     <div class="options" style="display: flex; gap: 40px;">
         <div style="display: flex; gap: 10px;">
-            <button class="btnToggle" id="modern">List</button>
-            <button class="btnToggle" id="grid">Grid</button>
+            <button class="btnToggle" id="modern" style="background-color: rgb(100, 100, 100); color: rgb(0, 0, 0);">List</button>
+            <button class="btnToggle" id="grid" style="background-color: rgb(0, 0, 0); color: rgb(34, 34, 34);">Grid</button>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button class="btnToggleType" id="classics">Classics</button>
-            <button class="btnToggleType" id="platformers">Platformers</button>
+            <button class="btnToggleType" id="classics" style="background-color: rgb(100, 100, 100); color: rgb(0, 0, 0);">Classics</button>
+            <button class="btnToggleType" id="platformers" style="background-color: rgb(0, 0, 0); color: rgb(34, 34, 34);" hidden>Platformers</button>
         </div>
         <div style="display: flex; gap: 10px;">
-            <button id="profiles">To player</button>
-            <textarea id="targetPlayerInput" placeholder="Search player" style="background-color: #000;"></textarea>
+            <button id="profiles" hidden>To player</button>
+            <textarea id="targetPlayerInput" placeholder="Search player" style="background-color: #000;" hidden></textarea>
         </div>
     </div>
 </div>
 
-<div id="list" class="list"></div>
+
+<div class="biggroup">
+        <div id="list" class="list">
+            
+        </div>
+    
+    <div class="right" style="text-align: right; font-size: 18px; max-width: 320px;">
+        <p style="text-align: right;">Completions sorted by AREDL<br><br>@azymyt on Discord for<br>questions/records/inquiries</p>
+        <p> platformers and player profiles are currently broken</p>
+        <a href="https://docs.google.com/spreadsheets/d/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/edit?usp=sharing" target="_blank">Sheet version</a>
+        <div class="playerscontainer" style="text-align: right;">
+            <p>PLAYERS:</p>
+            <p id="players"></p>
+        </div>
+    </div>
+
 </body>

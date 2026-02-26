@@ -8,6 +8,25 @@ body {
     align-items: center;
 }
 
+.right {
+    position: absolute;
+    right: 2%;
+    top: 2%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.playerscontainer {
+    align-self: right;
+    background-color: #111;
+    max-width: 170px;
+    margin: 10px;
+    border-radius: 5px;
+    padding-right: 10px;
+    transform: translateX(134px);
+}
+
 * {
     color: #ffffff;
 }
@@ -23,7 +42,7 @@ h3 {
 }
 
 .NIDLheader {
-    display: flex;
+    display: block;
     align-items: center;
     gap: 30px;
 }
@@ -35,13 +54,15 @@ h3 {
 }
 
 .NIDLheader img {
-    width: 120px;
-    height: 120px;
+    max-height: 200px;
 }
 
 .list {
     margin: 0;
     width: 1400px;
+    align-content: right;
+    text-align: right;
+    transform: translateX(-20px)
 }
 
 .card {
@@ -80,8 +101,9 @@ h3 {
 
 .options {
     margin-top: 20px;
-    display: grid;
+    display: flex;
     justify-content: center;
+    align-items: center;
     & button {
         border-radius: 10px;
         width: 140px;
@@ -94,10 +116,6 @@ h3 {
 #profiles {
     background-color: #ff8888;
     color: #000;
-    border-radius: 10px;
-    width: 140px;
-    height: 30px;
-    border: none;
 }
 
 #targetPlayerInput {
@@ -143,9 +161,9 @@ h3 {
 .victors {
     text-align: right;
     line-height: 0;
-    & .followingVictors {
+    & .followingVictors, .date {
         align-content: end;
-        color: rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.6);
         font-size: 20px;
     }
 }
@@ -155,8 +173,12 @@ h3 {
     text-align: left;
     & .textPublisher {
         font-size: 20px;
-        color: rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.6);
     }
+}
+
+.date {
+    transform: translateY(8px);
 }
 
 .list a {
@@ -167,7 +189,7 @@ h3 {
 .levelPos {
     align-content: center;
     font-size: 50px;
-    color: #333;
+    color: #444;
     text-align: center;
 }
 
@@ -180,7 +202,7 @@ h3 {
     align-content: center;
     justify-content: center;
     justify-items: center;
-    width: 100%;
+    width: 80%;
     transform: translateX(100px);
 }
 
