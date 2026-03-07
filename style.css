@@ -9,7 +9,7 @@ body {
 }
 
 .right {
-    background: linear-gradient(270deg, rgb(20, 20, 20), rgb(5, 5, 5));
+    background: linear-gradient(270deg, rgb(20, 20, 20), rgb(20, 20, 20, 0));
     position: absolute;
     right: 2%;
     top: 2%;
@@ -21,7 +21,7 @@ body {
 }
 
 .playerscontainer {
-    background: linear-gradient(90deg, rgb(5, 5, 5), rgb(28, 28, 28));
+    background: linear-gradient(270deg, rgb(20, 20, 20), rgb(20, 20, 20, 0));
     margin: 10px;
     border-radius: 10px;
     padding-right: 10px;
