@@ -9,6 +9,7 @@ const list = document.getElementById("list");
 const input = document.getElementById("targetPlayerInput");
 const nidlPlayers = document.getElementById("players");
 
+
 let profiles = false;
 let styling = "modern";
 let type = "classics";
@@ -25,12 +26,8 @@ btnClassics.addEventListener("click", () => updateType("classics"));
 btnPlatformers.addEventListener("click", () => updateType("platformers"));
 
 btnProfiles.addEventListener("click", () => {
-  profiles = profiles === false ? true : false;
   console.log(profiles);
-
-  profiles === true
-    ? (btnProfiles.textContent = "To list")
-    : (btnProfiles.textContent = "To player");
+  profiles = false;
   GenerateList();
 });
 
@@ -81,7 +78,7 @@ async function aredlList() {
     }
 
     const data = await response.json();
-    console.log(data);
+
     return data;
   } catch (error) {
     console.error("Error fetching levels:", error);
@@ -115,11 +112,7 @@ async function GenerateList() { //get list from AREDL API, display only what's b
       }
     }
     
-    if (profiles) {
-      await renderProfile(recordsData, aredlLevels);
-    } else {
-      await renderList(recordsData, aredlLevels);
-    }
+    await renderList(recordsData, aredlLevels);
 
   } catch (err) {
     console.error("Failed to fetch data:", err);
@@ -128,62 +121,56 @@ async function GenerateList() { //get list from AREDL API, display only what's b
 
 input.addEventListener("blur", () => {
   targetPlayer = input.value.trim();
-  renderProfile(recordsData, data);
+  profiles = true;
+  GenerateList();
 });
 
 async function renderList(profilesData, aredlLevels) {
   position = 0;
   list.innerHTML = "";
 
+  const completionsByLevel = {};
+  const profileByRecord = {};
+
+  for (const record of profilesData) {
+   if (!completionsByLevel[record.Record]) {
+     completionsByLevel[record.Record] = [];
+   }
+   completionsByLevel[record.Record].push(record);
+  }
+   
+  for (const levelName in completionsByLevel) {
+    completionsByLevel[levelName].sort((a, b) =>
+      new Date(a.Date) - new Date(b.Date)
+    );
+  }
   const completedLevels = new Set(
     profilesData.map(p => `${p.Record}`)
   );
 
-  const aredlFiltered = aredlLevels.filter(level => completedLevels.has(`${level.name}`))
-  console.log("aredl", aredlFiltered);
-  
-  console.log("completed", completedLevels);
-  
-  const profileByRecord = {};
-  for (const p of profilesData) {
-    profileByRecord[p.Record] = p;
-  }
-
   for (const level of aredlLevels) {
-    const profile = profileByRecord[level.name];
-    if (!profile) continue;
-      level.player = profile.Player;
-      level.completion = profile.Completion;
-      level.date = profile.Date;
     
-      const others = profilesData.filter(p =>
-        p.Record === level.name &&
-        p.Player !== profile.Player
-      );
+    const completions = completionsByLevel[level.name];
+    if (!completions) continue;
+
+    const first = completions[0];
     
-      level.FollowingVictors = others;
-    }
-  aredlFiltered.sort((a, b) => new Date(b.date) - new Date(a.date)); 
-  for (const level of aredlFiltered) {
+    level.player = first.Player;
+    level.date = first.Date;
+
+    level.completion = first.Completion && first.Completion.trim() !== ""
+      ? first.Completion
+      : "";
+
+    level.FollowingVictors = completions.slice(1);
+    
     await renderCard(level);
   }
+
+  console.log("completed", completedLevels);
+  console.log("completions: ", completionsByLevel);
 }
     
-async function renderProfile(profilesData, data) {
-  list.innerHTML = "";
-  const playerProfiles = profilesData.filter((p) => p.Player === targetPlayer);
-
-  const profileKeySet = new Set(
-    playerProfiles.map((p) => `${p.Record}::${p.Publisher}`),
-  );
-
-  const filteredData = data.filter((row) =>
-    profileKeySet.has(`${row.Record}::${row.Publisher}`),
-  );
-
-  filteredData.forEach(await renderCard);
-}
-
 async function AREDLLevelData(level_id) {
   try {
     const response = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${level_id}`, {
@@ -198,7 +185,7 @@ async function AREDLLevelData(level_id) {
     }
 
     const data = await response.json();
-    console.log(data);
+
     return data;
   } catch (error) {
     console.error("Error fetching level:", error);
@@ -207,6 +194,12 @@ async function AREDLLevelData(level_id) {
 }
 
 async function renderCard(item) {
+  if (profiles) {
+    if (item.player !== targetPlayer && !item.FollowingVictors.some(v => v.Player === targetPlayer)) {
+      return;
+    }
+  }
+
   entry = document.createElement("div");
   entry.classList.add("card");
   entry.classList.add(styling);
@@ -214,20 +207,24 @@ async function renderCard(item) {
 
   const level = await AREDLLevelData(item.level_id);
   position += 1 
-
-  if ((!item.completion) && level.verifications?.length > 0) {
-   item.completion = level.verifications[0].video_url;
-  }
   
-  const completionID = item.completion.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/,
-  )[1];
+  if (!item.completion || item.completion.trim() === "") {
+    if (level.verifications?.length > 0) {
+      item.completion = level.verifications[0].video_url;
+    }
+  };
+
+  const match = item.completion?.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
+  );
+
+  if (!match) return;
+  const completionID = match[1];;
 
   if (styling == "modern") {
     entry.innerHTML += `<p class="levelPos">#${position}</p>`;
   }
 
-  console.log(item);
   entry.style.setProperty(
     "--bg-url",
     `url("https://img.youtube.com/vi/${completionID}/maxresdefault.jpg")`,
