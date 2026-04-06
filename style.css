@@ -158,14 +158,16 @@ h3 {
     padding-left: 10px;
     padding-right: 10px;
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 7fr 3fr;
     align-content: center;
     height: 180px;
 }
 
 .victors {
+    align-self: flex-end;
     text-align: right;
     line-height: 0;
+    overflow: visible;
     & .followingVictors, .date {
         align-content: end;
         color: rgba(255, 255, 255, 0.6);
@@ -175,6 +177,12 @@ h3 {
 
 .level {
     line-height: 0;
+    overflow: visible;
+
+    & .textLevel {
+        line-height: auto;
+    }
+
     text-align: left;
     & .textPublisher {
         transform: translateY(-20px);
