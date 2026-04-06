@@ -124,11 +124,11 @@ h3 {
 }
 
 #targetPlayerInput {
-    resize: none; /* prevents resizing */
-    width: 132px; /* adjust width */
-    height: 22px; /* adjust height */
-    font-size: 14px; /* optional, smaller text */
-    padding: 4px; /* optional, nicer spacing */
+    resize: none;
+    width: 132px;
+    height: 22px;
+    font-size: 14px;
+    padding: 4px; 
     border-radius: 10px;
     text-align: center;
     border: none;
@@ -177,7 +177,19 @@ h3 {
     line-height: 0;
     text-align: left;
     & .textPublisher {
+        transform: translateY(-20px);
         font-size: 20px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+}
+
+.levelName {
+    display: flex;
+    & .textPosition {
+        align-self: center;
+        font-size: 20px;
+        margin-left: 10px;
         color: rgba(255, 255, 255, 0.6);
     }
 }

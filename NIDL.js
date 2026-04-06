@@ -250,11 +250,14 @@ async function renderCard(item) {
       270deg,
       rgba(0, 0, 0, 0),
       rgba(5, 5, 5, 1)
-      ), url('https://img.youtube.com/vi/${completionID}/maxresdefault.jpg');
-      background-size: cover;">
+      ), url('https://levelthumbs.prevter.me/thumbnail/${item.level_id}');
+      background-size: cover; background-position: center center;">
         <div class="container">
           <div class="level">
-            <p class="textLevel">${item.name}</p>
+            <div class="levelName">
+             <p class="textLevel">${item.name}</p>
+             <p class="textPosition">#${item.position}</p>
+            </div>
             <p class="textPublisher">by ${level.publisher.global_name}</p>
           </div>
         </div>
