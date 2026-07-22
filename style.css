@@ -2,32 +2,31 @@ body {
     min-height: 100vh;
     background-color: #050505;
     font-family: monospace;
-    gap: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .right {
     background: linear-gradient(270deg, rgb(20, 20, 20), rgba(0, 0, 0, 0));
-    position: absolute;
+    position: fixed;
     right: 2%;
     top: 2%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 10px;
+    gap: 1%;
+    padding: 1%;
+    border-radius: 4px;
     text-align: right;
-    font-size: 18px;
-    max-width: 360px;
+    font-size: 1vw;
+    max-width: 20vw;
 }
 
 .playerscontainer {
+    align-self: right;
     background: linear-gradient(270deg, rgb(26, 26, 26), rgba(0, 0, 0, 0));
-    margin: 10px;
-    border-radius: 10px;
-    padding-right: 10px;
+    margin-top: 5%;
+    border-radius: 4px;
+    padding-right: 5%;
+    width: 50%;
+    transform: translateX(80%);
 }
 
 * {
@@ -35,19 +34,20 @@ body {
 }
 
 h1 {
-    font-size: 70px;
+    font-size: 5vw;
     line-height: 0;
 }
 
 h3 {
-    font-size: 30px;
+    font-size: 3vw;
     line-height: 0;
 }
 
 .NIDLheader {
     display: block;
     align-items: center;
-    gap: 30px;
+    gap: 2%;
+    margin-left: 2%;
 }
 
 .NIDLheadInfo {
@@ -57,33 +57,39 @@ h3 {
 }
 
 .NIDLheader img {
-    max-height: 200px;
+    max-height: 15vh;
 }
 
 .list {
     margin: 0;
-    width: 1400px;
+    width: 70vw;
     align-content: right;
     text-align: right;
-    transform: translateX(-20px)
 }
 
 .card {
-    margin: 20px;
-    border-radius: 10px;
+    margin: 1%;
+    border-radius: 4px;
     display: grid;
     position: relative;
-    gap: 10px;
-    grid-template-columns: 200px 320px 1fr;
-    transform: translateX(-100px);
+    gap: 1%;
+    width: 100%;
+    grid-template-columns: 10% 10vw 1fr;
+    transition: transform 0.15s;
+}
+
+.biggroup {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    max-width: 80vw;
 }
 
 .card img {
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 .card > * {
-    font-size: 40px;
+    font-size: 1.5vw;
     font-weight:600;
     -webkit-text-stroke:0.6px rgba(0,0,0,1);
     text-shadow:
@@ -95,7 +101,7 @@ h3 {
 }
 
 .card:hover {
-    scale: 1.05;
+    transform: scale(1.05);
 }
 
 .contents {
@@ -107,15 +113,20 @@ h3 {
 .options {
     margin-top: 20px;
     display: flex;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
     & button {
-        border-radius: 10px;
+    transition: transform 0.15s;
+        border-radius: 4px;
         width: 140px;
         height: 30px;
         border: none;
     }
     gap: 10px;
+}
+
+button:hover {
+    transform: scale(1.1);
 }
 
 #profiles {
@@ -129,7 +140,7 @@ h3 {
     height: 22px;
     font-size: 14px;
     padding: 4px; 
-    border-radius: 10px;
+    border-radius: 4px;
     text-align: center;
     border: none;
 }
@@ -154,25 +165,63 @@ h3 {
         rgba(0, 0, 0, 0),
         rgba(255, 255, 255, 1)
     );
-    border-radius: 0 10px 10px 0;
+    border-radius: 0 4px 4px 0;
     padding-left: 10px;
     padding-right: 10px;
     display: grid;
-    grid-template-columns: 7fr 3fr;
+    grid-template-columns: 1fr 1fr;
     align-content: center;
-    height: 180px;
+    height: calc(10vw * 10 / 16);
 }
 
 .victors {
-    align-self: flex-end;
+    display: inline-block;
+    align-self: flex;
     text-align: right;
     line-height: 0;
     overflow: visible;
     & .followingVictors, .date {
         align-content: end;
         color: rgba(255, 255, 255, 0.6);
-        font-size: 20px;
+        font-size: 1vw;
     }
+}
+
+.victor {
+    transition: transform 0.15s;
+}
+
+.sheetlink {
+    transition: transform 0.15s;
+}
+
+.sheetlink:hover {
+    transform: scale(1.1);
+    transform: translateX(-20px);
+    color: #f00;
+    cursor: pointer;
+}
+
+.victor:hover {
+    width: 100%;
+    transform: scale(1.1);
+    transform: translateX(-20px);
+    color: #f00;
+    cursor: pointer;
+}
+
+.nidlPlayers {
+    margin: 0;
+    padding: 0px;
+    transition: transform 0.15s;
+}
+
+.nidlPlayers:hover {
+    cursor: pointer;
+    width: 100%;
+    transform: scale(1.1);
+    transform: translateX(-20px);
+    color: #f00;
 }
 
 .level {
@@ -185,8 +234,7 @@ h3 {
 
     text-align: left;
     & .textPublisher {
-        transform: translateY(-20px);
-        font-size: 20px;
+        font-size: 1vw;
         color: rgba(255, 255, 255, 0.6);
     }
     
@@ -196,24 +244,21 @@ h3 {
     display: flex;
     & .textPosition {
         align-self: center;
-        font-size: 20px;
+        font-size: 1vw;
         margin-left: 10px;
         color: rgba(255, 255, 255, 0.6);
     }
 }
 
-.date {
-    transform: translateY(8px);
-}
-
 .list a {
-    width: 320px;
-    height: 180px;
+    width: 10vw;
+    height: calc(10vw * 10 / 16);
 }
 
 .levelPos {
     align-content: center;
-    font-size: 50px;
+    font-size: 2vw;
+    line-height: 0;
     color: #444;
     text-align: center;
 }
@@ -227,10 +272,9 @@ h3 {
     align-content: center;
     justify-content: center;
     justify-items: center;
-    width: 80%;
-    transform: translateX(100px);
+    width: 70vw;
 }
 
 .gridstyle > * {
-    max-width: 320px;
+    max-width: 10vw;
 }

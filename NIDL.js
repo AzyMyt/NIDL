@@ -28,6 +28,7 @@ btnPlatformers.addEventListener("click", () => updateType("platformers"));
 btnProfiles.addEventListener("click", () => {
   console.log(profiles);
   profiles = false;
+  input.value = "";
   GenerateList();
 });
 
@@ -102,7 +103,17 @@ async function GenerateList() { //get list from AREDL API, display only what's b
     );
 
     console.log(recordsData);
-    nidlPlayers.innerHTML = [...new Set(recordsData.map(p => p.Player))].join("<br>") // replace this with a for loop for better styling in the future
+    
+    const players = [...new Set(recordsData.map(p => p.Player))];
+    
+    nidlPlayers.innerHTML = "";
+    for (const player of players) {
+      nidlPlayers.innerHTML += `
+      <p class="nidlPlayers" onclick="searchClick('${player}')">
+        ${player}
+      </p>
+      `;
+    }
 
     if (styling == "grid") {
       list.classList.add("gridstyle");
@@ -125,17 +136,24 @@ input.addEventListener("blur", () => {
   GenerateList();
 });
 
+function searchClick(query) {
+  player = String(query);
+  input.value = player;
+  targetPlayer = player;
+  profiles = true;
+  GenerateList();
+}
+
 async function renderList(profilesData, aredlLevels) {
   position = 0;
   list.innerHTML = "";
 
   const completionsByLevel = {};
-  const profileByRecord = {};
 
   for (const record of profilesData) {
    if (!completionsByLevel[record.Record]) {
      completionsByLevel[record.Record] = [];
-   }
+   } 
    completionsByLevel[record.Record].push(record);
   }
    
@@ -147,7 +165,6 @@ async function renderList(profilesData, aredlLevels) {
   const completedLevels = new Set(
     profilesData.map(p => `${p.Record}`)
   );
-
   for (const level of aredlLevels) {
     
     const completions = completionsByLevel[level.name];
@@ -166,10 +183,17 @@ async function renderList(profilesData, aredlLevels) {
     
     await renderCard(level);
   }
-
+  for (const levelName in completionsByLevel) {
+    if (!aredlLevels.some(level => level.name === levelName)) {
+      console.warn(
+        `Skipped "${levelName}" by ${completionsByLevel[levelName][0].Player}`
+    );
+  }
+}
   console.log("completed", completedLevels);
   console.log("completions: ", completionsByLevel);
 }
+
     
 async function AREDLLevelData(level_id) {
   try {
@@ -231,8 +255,8 @@ async function renderCard(item) {
   );
 
   entry.innerHTML += `
-    <a href="${item.completion}" target="_blank" width="320" height="180">
-    <img src="https://img.youtube.com/vi/${completionID}/maxresdefault.jpg" width="320" height="180">
+    <a href="${item.completion}" target="_blank" width="180" height="180">
+    <img src="https://img.youtube.com/vi/${completionID}/maxresdefault.jpg" width="100%" height="100%">
     </a>
   `;
 
@@ -263,13 +287,12 @@ async function renderCard(item) {
         </div>
         <div class="container victors">
           <p class="date">${item.date}</p>
-          <p class="victor">${item.player}</p>
+          <p class="victor" onclick="searchClick('${item.player}')">${item.player}</p>
           <p class="followingVictors">${item.FollowingVictors.map(v => v.Player).join(", ")}</p>
         </div>
       </div>
       `;
   } else if (type == "platformers" && styling == "modern") {
-    //platformers
     entry.innerHTML += `
       <div class="cardContainer" style="background: linear-gradient(
       270deg, rgba(0, 0, 0, 0), rgba(5, 5, 5, 1)
