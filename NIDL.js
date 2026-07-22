@@ -165,24 +165,35 @@ async function renderList(profilesData, aredlLevels) {
   const completedLevels = new Set(
     profilesData.map(p => `${p.Record}`)
   );
-  for (const level of aredlLevels) {
+ 
+  function parseUKDate(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return new Date(0);
     
-    const completions = completionsByLevel[level.name];
-    if (!completions) continue;
-
-    const first = completions[0];
-    
-    level.player = first.Player;
-    level.date = first.Date;
-
-    level.completion = first.Completion && first.Completion.trim() !== ""
-      ? first.Completion
-      : "";
-
-    level.FollowingVictors = completions.slice(1);
-    
-    await renderCard(level);
+    const [day, month, year] = dateStr.split('/').map(Number);
+    return new Date(year, month - 1, day);
   }
+
+  for (const level of aredlLevels) {
+    const completions = completionsByLevel[level.name];
+    if (!completions || completions.length === 0) continue;
+
+    const sortedCompletions = [...completions].sort((a, b) => {
+      return parseUKDate(a.Date) - parseUKDate(b.Date);
+    });
+
+    const first = sortedCompletions[0];
+    
+    const updatedLevel = {
+      ...level,
+      player: first.Player,
+      date: first.Date,
+      completion: first.Completion?.trim() ?? "",
+      FollowingVictors: sortedCompletions.slice(1)
+    };
+    
+    await renderCard(updatedLevel);
+  }
+
   for (const levelName in completionsByLevel) {
     if (!aredlLevels.some(level => level.name === levelName)) {
       const closeMatch = aredlLevels.find(level => {
