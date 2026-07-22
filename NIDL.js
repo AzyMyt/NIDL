@@ -167,9 +167,15 @@ async function renderList(profilesData, aredlLevels) {
   );
  
   function parseUKDate(dateStr) {
-    if (!dateStr || typeof dateStr !== 'string') return new Date(0);
-    
+    if (!dateStr || typeof dateStr !== 'string' || dateStr.trim() === "") {
+      return new Date(9999, 11, 31);
+    }   
     const [day, month, year] = dateStr.split('/').map(Number);
+    
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+      return new Date(9999, 11, 31); 
+    }
+
     return new Date(year, month - 1, day);
   }
 
