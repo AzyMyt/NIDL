@@ -185,11 +185,22 @@ async function renderList(profilesData, aredlLevels) {
   }
   for (const levelName in completionsByLevel) {
     if (!aredlLevels.some(level => level.name === levelName)) {
-      console.warn(
-        `Skipped "${levelName}" by ${completionsByLevel[levelName][0].Player}`
-    );
+      const closeMatch = aredlLevels.find(level => {
+        const a = level.name.toLowerCase();
+        const b = levelName.toLowerCase();
+        return a.includes(b) || b.includes(a);
+      });
+      if (closeMatch) {
+        console.warn(
+          `Skipped "${levelName}" by ${completionsByLevel[levelName][0].Player}. Did you mean "${closeMatch.name}"?`
+        );
+      } else {
+        console.warn(
+          `Skipped "${levelName}" by ${completionsByLevel[levelName][0].Player}.`
+        );
+      }
+    }
   }
-}
   console.log("completed", completedLevels);
   console.log("completions: ", completionsByLevel);
 }
