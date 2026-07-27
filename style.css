@@ -57,7 +57,7 @@ h3 {
 }
 
 .NIDLheader img {
-    max-height: 15vh;
+    max-height: 20vh;
 }
 
 .list {
@@ -196,17 +196,15 @@ button:hover {
 }
 
 .sheetlink:hover {
-    transform: scale(1.1);
-    transform: translateX(-20px);
-    color: #f00;
+    transform: scale(1.1) translateX(-30px);
+    color: #f88;
     cursor: pointer;
 }
 
 .victor:hover {
     width: 100%;
-    transform: scale(1.1);
-    transform: translateX(-20px);
-    color: #f00;
+    transform: scale(1.1) translateX(-30px);
+    color: #f88;
     cursor: pointer;
 }
 
@@ -219,9 +217,8 @@ button:hover {
 .nidlPlayers:hover {
     cursor: pointer;
     width: 100%;
-    transform: scale(1.1);
-    transform: translateX(-20px);
-    color: #f00;
+    transform: scale(1.1) translateX(-20px);
+    color: #f88;
 }
 
 .level {
