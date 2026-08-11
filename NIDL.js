@@ -123,11 +123,11 @@ async function GenerateList() { //get list from AREDL API, display only what's b
       }
     }
     
-    await renderList(recordsData, aredlLevels);
 
   } catch (err) {
     console.error("Failed to fetch data:", err);
   }
+  await renderList(recordsData, aredlLevels);
 }
 
 input.addEventListener("blur", () => {
@@ -245,6 +245,31 @@ async function AREDLLevelData(level_id) {
   }
 }
 
+async function getYouTubeThumbnail(videoID) {
+  const qualities = [
+    "maxresdefault",
+    "sddefault",
+    "hqdefault",
+    "mqdefault",
+    "default"
+  ];
+
+  for (const quality of qualities) {
+    const url = `https://img.youtube.com/vi/${videoID}/${quality}.jpg`;
+
+    const img = new Image();
+
+    const valid = await new Promise(resolve => {
+      img.onload = () => resolve(img.naturalWidth > 200);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+
+    if (valid) return url;
+  }
+  return null;
+}
+
 async function renderCard(item) {
   if (profiles) {
     if (item.player !== targetPlayer && !item.FollowingVictors.some(v => v.Player === targetPlayer)) {
@@ -276,15 +301,13 @@ async function renderCard(item) {
   if (styling == "modern") {
     entry.innerHTML += `<p class="levelPos">#${position}</p>`;
   }
+  
 
-  entry.style.setProperty(
-    "--bg-url",
-    `url("https://img.youtube.com/vi/${completionID}/maxresdefault.jpg")`,
-  );
+  const thumbnail = await getYouTubeThumbnail(completionID);
 
   entry.innerHTML += `
-    <a href="${item.completion}" target="_blank" width="180" height="180">
-    <img src="https://img.youtube.com/vi/${completionID}/maxresdefault.jpg" width="100%" height="100%">
+    <a href="${item.completion}" target="_blank">
+      <img src="${thumbnail}" width="100%" height="100%" style="object-fit: cover;">
     </a>
   `;
 
@@ -295,6 +318,8 @@ async function renderCard(item) {
   if (!item.date) {
     item.date = "";
   }
+  
+  const publisher = level.publisher?.global_name ?? "?????";
 
   if (type == "classics" && styling == "modern") {
     entry.innerHTML += `
@@ -310,7 +335,7 @@ async function renderCard(item) {
              <p class="textLevel">${item.name}</p>
              <p class="textPosition">#${item.position}</p>
             </div>
-            <p class="textPublisher">by ${level.publisher.global_name}</p>
+            <p class="textPublisher">by ${publisher}</p>
           </div>
         </div>
         <div class="container victors">
