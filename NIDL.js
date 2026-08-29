@@ -85,49 +85,57 @@ async function aredlList() {
     console.error("Error fetching levels:", error);
     return [];
   }
-}
+} 
 
-async function GenerateList() { //get list from AREDL API, display only what's been cleared in Northern Ireland
-  const aredlLevels = await aredlList();
+// Check AREDL for existing levels and display only what's been cleared in Northern Ireland
+async function GenerateList() {
   list.innerHTML = "";
-  
+
   try {
-    const responseRecords = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/values/${encodeURIComponent(`Records!A1:E`)}?key=AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU`,
-    );
+    const [aredlLevels, responseRecords] = await Promise.all([
+      aredlList(),
+      fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/values/${encodeURIComponent(`Records!A1:E`)}?key=AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU`
+      )
+    ]);
+
     const jsonRecords = await responseRecords.json();
 
     const [headers, ...rows] = jsonRecords.values;
-    recordsData = rows.map((row) =>
-      Object.fromEntries(row.map((v, i) => [headers[i], v])),
+
+    recordsData = rows.map(row =>
+      Object.fromEntries(
+        row.map((v, i) => [headers[i], v])
+      )
     );
 
     console.log(recordsData);
     
+    // calculate points for each player after list is fetched
+    // very likely would require moving this operation to after list fetching
     const players = [...new Set(recordsData.map(p => p.Player))];
-    
+
     nidlPlayers.innerHTML = "";
+
     for (const player of players) {
       nidlPlayers.innerHTML += `
-      <p class="nidlPlayers" onclick="searchClick('${player}')">
-        ${player}
-      </p>
+        <p class="nidlPlayers" onclick="searchClick('${player}')">
+          ${player}
+        </p>
       `;
     }
 
     if (styling == "grid") {
       list.classList.add("gridstyle");
     } else {
-      if (list.classList.contains("gridstyle")) {
-        list.classList.remove("gridstyle");
-      }
+      list.classList.remove("gridstyle");
     }
-    
+
+    await renderList(recordsData, aredlLevels);
 
   } catch (err) {
-    console.error("Failed to fetch data:", err);
+    console.error("Failed to generate list:", err);
   }
-  await renderList(recordsData, aredlLevels);
 }
 
 input.addEventListener("blur", () => {
@@ -151,62 +159,85 @@ async function renderList(profilesData, aredlLevels) {
   const completionsByLevel = {};
 
   for (const record of profilesData) {
-   if (!completionsByLevel[record.Record]) {
-     completionsByLevel[record.Record] = [];
-   } 
-   completionsByLevel[record.Record].push(record);
+    if (!completionsByLevel[record.Record]) {
+      completionsByLevel[record.Record] = [];
+    }
+
+    completionsByLevel[record.Record].push(record);
   }
-   
-  for (const levelName in completionsByLevel) {
-    completionsByLevel[levelName].sort((a, b) =>
-      new Date(a.Date) - new Date(b.Date)
-    );
-  }
-  const completedLevels = new Set(
-    profilesData.map(p => `${p.Record}`)
-  );
- 
+
   function parseUKDate(dateStr) {
-    if (!dateStr || typeof dateStr !== 'string' || dateStr.trim() === "") {
+    if (!dateStr || typeof dateStr !== "string" || dateStr.trim() === "") {
       return new Date(9999, 11, 31);
-    }   
-    const [day, month, year] = dateStr.split('/').map(Number);
-    
+    }
+
+    const [day, month, year] = dateStr.split("/").map(Number);
+
     if (isNaN(day) || isNaN(month) || isNaN(year)) {
-      return new Date(9999, 11, 31); 
+      return new Date(9999, 11, 31);
     }
 
     return new Date(year, month - 1, day);
   }
 
+  for (const levelName in completionsByLevel) {
+    completionsByLevel[levelName].sort(
+      (a, b) => parseUKDate(a.Date) - parseUKDate(b.Date)
+    );
+  }
+
+  const completedLevels = new Set(
+    profilesData.map(p => `${p.Record}`)
+  );
+
+  const cards = [];
+
   for (const level of aredlLevels) {
     const completions = completionsByLevel[level.name];
+
     if (!completions || completions.length === 0) continue;
 
-    const sortedCompletions = [...completions].sort((a, b) => {
-      return parseUKDate(a.Date) - parseUKDate(b.Date);
-    });
+    const sortedCompletions = [...completions].sort(
+      (a, b) => parseUKDate(a.Date) - parseUKDate(b.Date)
+    );
 
     const first = sortedCompletions[0];
     
-    const updatedLevel = {
+    // i dont remember my own code ffs
+    // i interact with this codebase once a month at best
+
+    // add points
+    cards.push({
       ...level,
       player: first.Player,
       date: first.Date,
       completion: first.Completion?.trim() ?? "",
       FollowingVictors: sortedCompletions.slice(1)
-    };
-    
-    await renderCard(updatedLevel);
+    });
   }
 
+  const renderedCards = await Promise.all(
+    cards.map((item, index) =>
+      renderCard(item, index + 1)
+    )
+  );
+
+  for (const entry of renderedCards) {
+    if (entry) {
+      list.appendChild(entry);
+    }
+  }
+
+  // Spellcheck / level skip warning
   for (const levelName in completionsByLevel) {
     if (!aredlLevels.some(level => level.name === levelName)) {
       const closeMatch = aredlLevels.find(level => {
         const a = level.name.toLowerCase();
         const b = levelName.toLowerCase();
+
         return a.includes(b) || b.includes(a);
       });
+
       if (closeMatch) {
         console.warn(
           `Skipped "${levelName}" by ${completionsByLevel[levelName][0].Player}. Did you mean "${closeMatch.name}"?`
@@ -218,6 +249,7 @@ async function renderList(profilesData, aredlLevels) {
       }
     }
   }
+
   console.log("completed", completedLevels);
   console.log("completions: ", completionsByLevel);
 }
@@ -270,38 +302,40 @@ async function getYouTubeThumbnail(videoID) {
   return null;
 }
 
-async function renderCard(item) {
+async function renderCard(item, position) {
   if (profiles) {
-    if (item.player !== targetPlayer && !item.FollowingVictors.some(v => v.Player === targetPlayer)) {
-      return;
+    if (
+      item.player !== targetPlayer &&
+      !item.FollowingVictors.some(v => v.Player === targetPlayer)
+    ) {
+      return null;
     }
   }
 
-  entry = document.createElement("div");
+  const entry = document.createElement("div");
   entry.classList.add("card");
   entry.classList.add(styling);
   entry.classList.add(type);
 
   const level = await AREDLLevelData(item.level_id);
-  position += 1 
-  
+
   if (!item.completion || item.completion.trim() === "") {
     if (level.verifications?.length > 0) {
       item.completion = level.verifications[0].video_url;
     }
-  };
+  }
 
   const match = item.completion?.match(
     /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
   );
 
-  if (!match) return;
-  const completionID = match[1];;
+  if (!match) return null;
+
+  const completionID = match[1];
 
   if (styling == "modern") {
     entry.innerHTML += `<p class="levelPos">#${position}</p>`;
   }
-  
 
   const thumbnail = await getYouTubeThumbnail(completionID);
 
@@ -314,12 +348,12 @@ async function renderCard(item) {
   if (!item.FollowingVictors) {
     item.FollowingVictors = "";
   }
-  
+
   if (!item.date) {
     item.date = "";
   }
-  
-  const publisher = level.publisher?.global_name ?? "?????";
+
+  const publisher = level.publisher?.global_name ?? "?????";;
 
   if (type == "classics" && styling == "modern") {
     entry.innerHTML += `
@@ -364,8 +398,12 @@ async function renderCard(item) {
       </div>
       `;
   }
-  list.appendChild(entry);
+  
+  return entry;
+
 }
 
 GenerateList();
 console.log(styling, type, "profile view:", profiles);
+// profiles to be improved later
+// maybe with discord int idfk turbo low priority
