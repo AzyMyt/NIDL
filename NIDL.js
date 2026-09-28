@@ -8,6 +8,7 @@ const btnProfiles = document.getElementById("profiles");
 const list = document.getElementById("list");
 const input = document.getElementById("targetPlayerInput");
 const nidlPlayers = document.getElementById("players");
+const playerPointArea = document.getElementById("playerPointArea");
 
 
 let profiles = false;
@@ -88,7 +89,11 @@ async function aredlList() {
 } 
 
 // Check AREDL for existing levels and display only what's been cleared in Northern Ireland
+players = [];
+playerPoints = {};
+
 async function GenerateList() {
+  playerPoints = {};
   list.innerHTML = "";
 
   try {
@@ -100,7 +105,6 @@ async function GenerateList() {
     ]);
 
     const jsonRecords = await responseRecords.json();
-
     const [headers, ...rows] = jsonRecords.values;
 
     recordsData = rows.map(row =>
@@ -110,20 +114,7 @@ async function GenerateList() {
     );
 
     console.log(recordsData);
-    
-    // calculate points for each player after list is fetched
-    // very likely would require moving this operation to after list fetching
-    const players = [...new Set(recordsData.map(p => p.Player))];
-
-    nidlPlayers.innerHTML = "";
-
-    for (const player of players) {
-      nidlPlayers.innerHTML += `
-        <p class="nidlPlayers" onclick="searchClick('${player}')">
-          ${player}
-        </p>
-      `;
-    }
+    players = [...new Set(recordsData.map(p => p.Player))];
 
     if (styling == "grid") {
       list.classList.add("gridstyle");
@@ -131,7 +122,34 @@ async function GenerateList() {
       list.classList.remove("gridstyle");
     }
 
+    players = [...new Set(recordsData.map(p => p.Player))];
+
     await renderList(recordsData, aredlLevels);
+
+    nidlPlayers.innerHTML = "";
+
+    players.sort((a, b) =>
+      (playerPoints[b] ?? 0) - (playerPoints[a] ?? 0)
+    );
+
+    let previousPoints = null;
+    let rank = 0;
+
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
+      const points = playerPoints[player] ?? 0;
+
+      if (points !== previousPoints) {
+        rank = i + 1;
+        previousPoints = points;
+      }
+
+      nidlPlayers.innerHTML += `
+        <p class="nidlPlayers" onclick="searchClick('${player}')">
+          #${rank} ${player} - ${points.toFixed(1)} pts
+        </p>
+      `;
+    }
 
   } catch (err) {
     console.error("Failed to generate list:", err);
@@ -152,8 +170,10 @@ function searchClick(query) {
   GenerateList();
 }
 
+playerPointArea.textContent = "";
+const t = 0;
 async function renderList(profilesData, aredlLevels) {
-  position = 0;
+  nidlposition = 0;
   list.innerHTML = "";
 
   const completionsByLevel = {};
@@ -200,19 +220,47 @@ async function renderList(profilesData, aredlLevels) {
     const sortedCompletions = [...completions].sort(
       (a, b) => parseUKDate(a.Date) - parseUKDate(b.Date)
     );
+    
+    nidlposition += 1
 
     const first = sortedCompletions[0];
-    
-    // i dont remember my own code ffs
-    // i interact with this codebase once a month at best
 
-    // add points
+    const x = (level.position - 1) / (aredlLevels.length - 1);
+    
+    const nidlpoints = Number((1 + 4999 * (
+      Math.pow(1 - x, 6) /
+      (
+        Math.pow(1 - x, 6) +
+        30 * Math.pow(x, 0.77)
+      )
+    )).toFixed(1));
+    
+    for (const completion of sortedCompletions) {
+      const player = completion.Player;
+    
+      if (!playerPoints[player]) {
+        playerPoints[player] = 0;
+      }
+    
+      playerPoints[player] += nidlpoints;
+    }
+    
+    if (profiles) {
+      playerPointArea.textContent = `${Math.round(playerPoints[player] * 10) / 10} pts`;
+    }
+     else {
+      playerPointArea.textContent = "";
+     }
+    
     cards.push({
       ...level,
+      nidlposition: nidlposition,
       player: first.Player,
       date: first.Date,
       completion: first.Completion?.trim() ?? "",
-      FollowingVictors: sortedCompletions.slice(1)
+      FollowingVictors: sortedCompletions.slice(1),
+      FollowingVictorsArray: sortedCompletions,
+      nidlpoints: nidlpoints
     });
   }
 
@@ -252,6 +300,7 @@ async function renderList(profilesData, aredlLevels) {
 
   console.log("completed", completedLevels);
   console.log("completions: ", completionsByLevel);
+  return playerPoints;
 }
 
     
@@ -302,7 +351,7 @@ async function getYouTubeThumbnail(videoID) {
   return null;
 }
 
-async function renderCard(item, position) {
+async function renderCard(item) {
   if (profiles) {
     if (
       item.player !== targetPlayer &&
@@ -334,7 +383,7 @@ async function renderCard(item, position) {
   const completionID = match[1];
 
   if (styling == "modern") {
-    entry.innerHTML += `<p class="levelPos">#${position}</p>`;
+    entry.innerHTML += `<p class="levelPos">#${item.nidlposition}</p>`;
   }
 
   const thumbnail = await getYouTubeThumbnail(completionID);
@@ -369,6 +418,7 @@ async function renderCard(item, position) {
              <p class="textLevel">${item.name}</p>
              <p class="textPosition">#${item.position}</p>
             </div>
+            <p class="textPoints">+${item.nidlpoints} pts</p>
             <p class="textPublisher">by ${publisher}</p>
           </div>
         </div>
@@ -398,12 +448,15 @@ async function renderCard(item, position) {
       </div>
       `;
   }
-  
   return entry;
-
 }
 
-GenerateList();
+(async () => {
+    await GenerateList();
+})();
 console.log(styling, type, "profile view:", profiles);
+
+
+
 // profiles to be improved later
 // maybe with discord int idfk turbo low priority

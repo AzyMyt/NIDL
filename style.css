@@ -19,14 +19,26 @@ body {
     max-width: 20vw;
 }
 
+#playerPointArea {
+    align-self: center;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    height: 0;
+    min-height: 0;
+}
+
 .playerscontainer {
     align-self: right;
+    p {
+    text-align: left;
+    }
     background: linear-gradient(270deg, rgb(26, 26, 26), rgba(0, 0, 0, 0));
     margin-top: 5%;
     border-radius: 4px;
-    padding-right: 5%;
-    width: 50%;
-    transform: translateX(80%);
+    padding-right: 2%;
+    width: 100%;
+    transform: translateX(0%);
 }
 
 * {
@@ -230,6 +242,13 @@ button:hover {
     }
 
     text-align: left;
+    
+    & .textPoints {
+        font-size: 1vw;
+        color: rgba(255, 255, 255 0.4);
+        margin: 0;
+        padding: 0;
+    }
     & .textPublisher {
         font-size: 1vw;
         color: rgba(255, 255, 255, 0.6);
