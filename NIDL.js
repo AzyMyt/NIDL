@@ -100,12 +100,12 @@ async function GenerateList() {
     const [aredlLevels, responseRecords] = await Promise.all([
       aredlList(),
       fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/values/${encodeURIComponent(`Records!A1:E`)}?key=AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU`
+        `https://sheets.googleapis.com/v4/spreadsheets/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/values/${encodeURIComponent(`Records!A1:J`)}?key=AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU`
       )
     ]);
-
     const jsonRecords = await responseRecords.json();
     const [headers, ...rows] = jsonRecords.values;
+    document.title = `NIDL - ${headers[9]}`; 
 
     recordsData = rows.map(row =>
       Object.fromEntries(
@@ -278,6 +278,12 @@ async function renderList(profilesData, aredlLevels) {
 
   // Spellcheck / level skip warning
   for (const levelName in completionsByLevel) {
+    const firstRecord = completionsByLevel[levelName][0];
+
+    if (firstRecord?.Unrated?.toUpperCase() != "Y") {
+      continue; 
+    }
+
     if (!aredlLevels.some(level => level.name === levelName)) {
       const closeMatch = aredlLevels.find(level => {
         const a = level.name.toLowerCase();
@@ -285,7 +291,6 @@ async function renderList(profilesData, aredlLevels) {
 
         return a.includes(b) || b.includes(a);
       });
-
       if (closeMatch) {
         console.warn(
           `Skipped "${levelName}" by ${completionsByLevel[levelName][0].Player}. Did you mean "${closeMatch.name}"?`
@@ -416,7 +421,8 @@ async function renderCard(item) {
           <div class="level">
             <div class="levelName">
              <p class="textLevel">${item.name}</p>
-             <p class="textPosition">#${item.position}</p>
+             <p onclick="window.open('https://aredl.net/list/${item.level_id}', '_blank');"
+                class="textPosition">#${item.position}</p>
             </div>
             <p class="textPoints">+${item.nidlpoints} pts</p>
             <p class="textPublisher">by ${publisher}</p>
