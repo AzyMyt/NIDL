@@ -10,7 +10,6 @@ const input = document.getElementById("targetPlayerInput");
 const nidlPlayers = document.getElementById("players");
 const playerPointArea = document.getElementById("playerPointArea");
 
-
 let profiles = false;
 let styling = "modern";
 let type = "classics";
@@ -67,8 +66,13 @@ updateActiveButton(styleButtons, styling);
 updateActiveButton(typeButtons, type);
 
 async function aredlList() {
+  if(type == "classics") {
+    aredlLink = `https://api.aredl.net/v2/api/aredl/levels`
+  } else {
+    aredlLink = `https://api.aredl.net/v2/api/arepl/levels`
+  }
   try {
-    const response = await fetch("https://api.aredl.net/v2/api/aredl/levels", {
+    const response = await fetch(aredlLink, {
       method: "GET",
       headers: {
         "Accept": "application/json"
@@ -95,12 +99,17 @@ playerPoints = {};
 async function GenerateList() {
   playerPoints = {};
   list.innerHTML = "";
+  if(type == "classics") {
+    sheetLink = `https://sheets.googleapis.com/v4/spreadsheets/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/values/${encodeURIComponent(`Records!A1:J`)}?key=AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU`
+  } else {
+    sheetLink = `https://sheets.googleapis.com/v4/spreadsheets/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/values/${encodeURIComponent(`Plats!A1:J`)}?key=AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU`
+  }
 
   try {
     const [aredlLevels, responseRecords] = await Promise.all([
       aredlList(),
       fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/1kgSNtY1q_RscXJGZe-XOM5NSUfpV1UkYnmLthz8fFlI/values/${encodeURIComponent(`Records!A1:J`)}?key=AIzaSyCBmzuL3Z3NORg7j5Jtfq791Y8Hf7Yq0DU`
+        sheetLink
       )
     ]);
     const jsonRecords = await responseRecords.json();
@@ -311,12 +320,21 @@ async function renderList(profilesData, aredlLevels) {
     
 async function AREDLLevelData(level_id) {
   try {
-    const response = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${level_id}`, {
+    if (type == "classics") {
+    response = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${level_id}`, {
       method: "GET",
       headers: {
         "Accept": "application/json"
       }
-    });
+    })
+  } else {
+    response = await fetch(`https://api.aredl.net/v2/api/arepl/levels/${level_id}`, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json"
+      }
+    })
+  };
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -438,18 +456,26 @@ async function renderCard(item) {
   } else if (type == "platformers" && styling == "modern") {
     entry.innerHTML += `
       <div class="cardContainer" style="background: linear-gradient(
-      270deg, rgba(0, 0, 0, 0), rgba(5, 5, 5, 1)
-      ), url('https://img.youtube.com/vi/${completionID}/maxresdefault.jpg');
-      background-size: cover;">
+      270deg,
+      rgba(0, 0, 0, 0),
+      rgba(5, 5, 5, 1)
+      ), url('https://levelthumbs.prevter.me/thumbnail/${item.level_id}');
+      background-size: cover; background-position: center center;">
         <div class="container">
           <div class="level">
-            <p class="textLevel">${item.Record}</p>
-            <p class="textPublisher">by ${item.Publisher}</p>
+            <div class="levelName">
+             <p class="textLevel">${item.name}</p>
+             <p onclick="window.open('https://aredl.net/list/${item.level_id}?list=platformer', '_blank');"
+                class="textPosition">#${item.position}</p>
+            </div>
+            <p class="textPoints">+${item.nidlpoints} pts</p>
+            <p class="textPublisher">by ${publisher}</p>
           </div>
         </div>
         <div class="container victors">
-          <p class="firstVictor">${item.FirstVictor}</p>
-          <p class="followingVictors">${item.FollowingVictors}</p>
+          <p class="date">${item.date}</p>
+          <p class="victor" onclick="searchClick('${item.player}')">${item.player}</p>
+          <p class="followingVictors">${item.FollowingVictors.map(v => v.Player).join(", ")}</p>
         </div>
       </div>
       `;
